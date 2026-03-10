@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "837466394012",
+    "project_id": "suc-forum",
+    "storage_bucket": "suc-forum.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:837466394012:android:f671ea39bb03bc29068c59",
+        "android_client_info": {
+          "package_name": "com.example.suc_forum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu99yBtpecN7vw7yOGdLa-CmhHHU41o1s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
