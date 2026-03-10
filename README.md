@@ -1,17 +1,9 @@
 # suc_forum
 
-A new Flutter project.
+Project Background:
 
-## Getting Started
+SUC Forum is envisioned as a mobile-first forum app tailored for our school's students, faculty, and staff. 
 
-This project is a starting point for a Flutter application.
+It addresses the need for a safe, organized space for discussions on academic topics, events, extracurriculars, and general campus life. 
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Given our location in Malaysia, the app must prioritize content moderation to avoid sensitive 3R issues, aligning with MCMC guidelines and the Online Safety Act 2025.
