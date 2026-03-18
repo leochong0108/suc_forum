@@ -5,6 +5,7 @@ import '../models/post.dart';
 import '../services/firestore_service.dart';
 import 'post_detail_screen.dart';
 import 'admin_dashboard_screen.dart';
+import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,17 +40,20 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.read<AuthService>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('SUC Forum - Home'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.admin_panel_settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+          if (authService.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+              ),
             ),
-          ),
         ],
         bottom: TabBar(
           controller: _tabController,

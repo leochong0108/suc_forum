@@ -182,11 +182,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   StreamBuilder<List<Comment>>(
                     stream: firestoreService.getComments(widget.post.id),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData)
+                      if (!snapshot.hasData) {
                         return const CircularProgressIndicator();
+                      }
                       final comments = snapshot.data!;
-                      if (comments.isEmpty)
+                      if (comments.isEmpty) {
                         return const Text('No comments yet.');
+                      }
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),

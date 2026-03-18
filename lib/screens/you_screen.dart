@@ -68,8 +68,16 @@ class _YouScreenState extends State<YouScreen> {
                   size: 40,
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(name, style: Theme.of(context).textTheme.headlineSmall),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(name, style: Theme.of(context).textTheme.headlineSmall),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 20),
+                    onPressed: () => _showEditNameDialog(authService, name),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
               Text(user.isAnonymous ? "Anonymous Mode" : "Real-Name Mode"),
               const SizedBox(height: 16),
@@ -154,6 +162,48 @@ class _YouScreenState extends State<YouScreen> {
           },
         );
       },
+    );
+  }
+
+  void _showEditNameDialog(AuthService authService, String currentName) {
+    final controller = TextEditingController(text: currentName);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Name"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: "New Display Name"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newName = controller.text.trim();
+              if (newName.isNotEmpty) {
+                // Update Firebase Auth display name and 'users' collection
+                await authService.updateUserName(newName);
+
+                // Update 'posts' and 'comments' where this user is the author
+                if (mounted) {
+                  await context
+                      .read<FirestoreService>()
+                      .updateUserName(authService.user!.uid, newName);
+                }
+
+                if (mounted) Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Name updated successfully!")),
+                );
+              }
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
     );
   }
 

@@ -42,9 +42,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50,
-      maxWidth: 800,
-      maxHeight: 800,
+      imageQuality: 25,
+      maxWidth: 400,
+      maxHeight: 400,
     );
     if (pickedFile != null) {
       setState(() {
@@ -58,7 +58,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (_pickedImage == null) return null;
     try {
       final bytes = await _pickedImage!.readAsBytes();
-      if (bytes.length > 700000) {
+      if (bytes.length > 400000) {
         throw Exception("Image is too large. Please select a smaller photo.");
       }
       return base64Encode(bytes);
@@ -75,7 +75,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       // or FirebaseVertexAI wrapper. We simulate the call structure here.
       // If FirebaseVertexAI is successfully configured:
       /*
-      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-1.5-flash');
+      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-2.5-flash');
       final prompt = "Review this post for 3R sensitivities (Race, Religion, Royalty in Malaysia contexts) and indecent content. Reply merely with 'APPROVED' if it is safe, or 'REJECTED: <reason>' if not. Text: $text";
       final response = await model.generateContent([Content.text(prompt)]);
       final result = response.text ?? 'APPROVED';
@@ -121,10 +121,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
 
       if (status == 'rejected') {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Post rejected by AI moderation.')),
           );
+        }
         setState(() => _isLoading = false);
         return;
       }
@@ -181,10 +182,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error creating post: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -202,7 +204,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: _selectedTopic,
+                    initialValue: _selectedTopic,
                     items: _topics
                         .map(
                           (topic) => DropdownMenuItem(

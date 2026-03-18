@@ -130,4 +130,36 @@ class FirestoreService {
               .toList(),
         );
   }
+
+  Future<void> updateUserName(String uid, String newName) async {
+    final batch = _db.batch();
+
+    // 1. Update user document
+    DocumentReference userRef = _db.collection('users').doc(uid);
+    batch.update(userRef, {'name': newName});
+
+    // 2. Update all posts by this author
+    QuerySnapshot userPosts = await _db
+        .collection('posts')
+        .where('authorId', isEqualTo: uid)
+        .get();
+
+    for (var doc in userPosts.docs) {
+      batch.update(doc.reference, {'authorName': newName});
+    }
+
+    // 3. Update all comments by this author using collection group
+    // Note: If the user has > 500 posts+comments, this might exceed batch limit.
+    // In a real app, you'd handle this with chunking or a Cloud Function.
+    QuerySnapshot userComments = await _db
+        .collectionGroup('comments')
+        .where('authorId', isEqualTo: uid)
+        .get();
+
+    for (var doc in userComments.docs) {
+      batch.update(doc.reference, {'authorName': newName});
+    }
+
+    await batch.commit();
+  }
 }

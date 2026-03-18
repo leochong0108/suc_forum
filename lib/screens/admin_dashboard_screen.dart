@@ -3,12 +3,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../services/firestore_service.dart';
+import '../services/auth_service.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.read<AuthService>();
+
+    if (!authService.isAdmin) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Access Denied')),
+        body: const Center(
+          child: Text('You do not have permission to access this page.'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Admin Dashboard - Reports')),
       body: StreamBuilder<QuerySnapshot>(
