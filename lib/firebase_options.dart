@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'suc-forum.firebaseapp.com',
     storageBucket: 'suc-forum.firebasestorage.app',
   );
-
 }
