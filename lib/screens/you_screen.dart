@@ -72,10 +72,11 @@ class _YouScreenState extends State<YouScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(name, style: Theme.of(context).textTheme.headlineSmall),
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () => _showEditNameDialog(authService, name),
-                  ),
+                  if (!user.isAnonymous)
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      onPressed: () => _showEditNameDialog(authService, name),
+                    ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -147,10 +148,11 @@ class _YouScreenState extends State<YouScreen> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () => _editPost(post),
-                    ),
+                    if (!context.read<AuthService>().isAnonymous)
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () => _editPost(post),
+                      ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => _confirmDeletePost(post),
