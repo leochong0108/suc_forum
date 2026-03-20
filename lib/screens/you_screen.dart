@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../widgets/auth_form.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/user_posts_list.dart';
+import 'favorite_screen.dart';
 
 class YouScreen extends StatelessWidget {
   const YouScreen({super.key});
@@ -19,7 +20,24 @@ class YouScreen extends StatelessWidget {
     final authService = context.watch<AuthService>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('You')),
+      appBar: AppBar(
+        title: const Text('You'),
+        actions: [
+          if (authService.isAuthenticated)
+            IconButton(
+              tooltip: 'My Collections',
+              icon: const Icon(Icons.bookmarks_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CollectionsScreen(),
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
       body: authService.isAuthenticated
           ? _buildProfile(context, authService)
           : AuthForm(

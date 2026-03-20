@@ -162,4 +162,43 @@ class FirestoreService {
 
     await batch.commit();
   }
+
+  // Favorite
+  Future<void> toggleFavorite(String userId, Post post, bool isFavorite) async {
+    final ref = _db
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .doc(post.id);
+
+    if (isFavorite) {
+      await ref.set(post.toMap()); // Save the whole post for offline viewing
+    } else {
+      await ref.delete();
+    }
+  }
+
+  // Check if a post is already favorited (Real-time)
+  Stream<bool> isPostFavorited(String userId, String postId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .doc(postId)
+        .snapshots()
+        .map((doc) => doc.exists);
+  }
+
+  Stream<List<Post>> getFavoritePosts(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList(),
+        );
+  }
 }
