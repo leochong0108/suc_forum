@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-// import 'package:firebase_ai/firebase_ai.dart';
+import 'package:firebase_ai/firebase_ai.dart';
 import '../models/post.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -68,30 +68,67 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  Future<String> _moderateContent(String text) async {
-    // 3R Sensitivity & Indecent content check using Gemini
-    try {
-      // NOTE: This assumes standard generative_ai package initialized with API key,
-      // or FirebaseVertexAI wrapper. We simulate the call structure here.
-      // If FirebaseVertexAI is successfully configured:
-      /*
-      final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-2.5-flash');
-      final prompt = "Review this post for 3R sensitivities (Race, Religion, Royalty in Malaysia contexts) and indecent content. Reply merely with 'APPROVED' if it is safe, or 'REJECTED: <reason>' if not. Text: $text";
-      final response = await model.generateContent([Content.text(prompt)]);
-      final result = response.text ?? 'APPROVED';
-      if (result.contains('REJECTED')) return 'rejected';
-      return 'approved';
-      */
+  // Future<String> _moderateContent(String text) async {
+  //   // 3R Sensitivity & Indecent content check using Gemini
+  //   try {
+  //     // NOTE: This assumes standard generative_ai package initialized with API key,
+  //     // or FirebaseVertexAI wrapper. We simulate the call structure here.
+  //     // If FirebaseVertexAI is successfully configured:
+  //     /*
+  //     final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-2.5-flash');
+  //     final prompt = "Review this post for 3R sensitivities (Race, Religion, Royalty in Malaysia contexts) and indecent content. Reply merely with 'APPROVED' if it is safe, or 'REJECTED: <reason>' if not. Text: $text";
+  //     final response = await model.generateContent([Content.text(prompt)]);
+  //     final result = response.text ?? 'APPROVED';
+  //     if (result.contains('REJECTED')) return 'rejected';
+  //     return 'approved';
+  //     */
 
-      final lower = text.toLowerCase();
-      final badWords = ['badword', 'fuck', 'shit', 'babi', 'sial'];
-      for (var word in badWords) {
-        if (lower.contains(word)) return 'rejected';
-      }
-      return 'approved';
+  //     final lower = text.toLowerCase();
+  //     final badWords = ['badword', 'fuck', 'shit', 'babi', 'sial'];
+  //     for (var word in badWords) {
+  //       if (lower.contains(word)) return 'rejected';
+  //     }
+  //     return 'approved';
+  //   } catch (e) {
+  //     debugPrint("Moderation error: $e");
+  //     return 'pending'; // Fallback to manual review
+  //   }
+  // }
+
+  Future<Map<String, String>> _moderateContent(String title, String text) async {
+    try {
+      // 1. Initialize the model using the Google AI backend
+      final model = FirebaseAI.googleAI().generativeModel(
+        model: 'gemini-2.5-flash',
+        generationConfig: GenerationConfig(
+          temperature: 0.1, // Lower temperature = more consistent "robot" moderation
+          responseMimeType: 'application/json', // Force JSON output
+        ),
+      );
+
+      // 2. The Prompt (Tailored for Malaysian 3R)
+      final prompt =
+          """
+          You are an MCMC-compliant moderator for a Malaysian university forum.
+          Analyze this post for:
+          - 3R violations (Race, Religion, Royalty).
+          - Indecent content (Profanity, Violence).
+          
+          Post: "$title $text"
+          
+          Return JSON: {"status": "approved" | "rejected", "reason": "string"}
+        """;
+
+      // 3. Generate Content
+      final response = await model.generateContent([Content.text(prompt)]);
+      final Map<String, dynamic> data = jsonDecode(response.text!);
+
+      return {
+        'status': data['status'] ?? 'pending',
+        'reason': data['reason'] ?? 'No reason provided',
+      };
     } catch (e) {
-      debugPrint("Moderation error: $e");
-      return 'pending'; // Fallback to manual review
+      return {'status': 'pending', 'reason': 'Moderation system error.'};
     }
   }
 
@@ -101,30 +138,35 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     final user = authService.user;
 
     if (user == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please log in to post.')));
+      _showSnackBar('Please log in to post.');
       return;
     }
     if (_titleController.text.isEmpty || _textController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Title and text are required.')),
-      );
+      _showSnackBar('Title and content are required.');
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final status = await _moderateContent(
-        "${_titleController.text} ${_textController.text}",
+      // final status = await _moderateContent(
+      //   "${_titleController.text} ${_textController.text}",
+      // );
+
+      // 1. Run Gemini Moderation
+      final moderation = await _moderateContent(
+        _titleController.text,
+        _textController.text,
       );
 
+      final String status = moderation['status']!;
+      final String reason = moderation['reason']!;
+
+      // 2. Handle Rejection (3R / Indecency)
       if (status == 'rejected') {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Post rejected by AI moderation.')),
-          );
+          _showRejectionDialog(reason); // Help the user understand why
+
         }
         setState(() => _isLoading = false);
         return;
@@ -147,6 +189,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         topic: _selectedTopic,
         imageUrl: imageUrl,
         status: status, // typically 'approved' or 'pending'
+        // rejectionReason: status == 'rejected' ? reason : null,
         createdAt: DateTime.now(),
       );
 
@@ -164,9 +207,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Post created successfully!')),
-        );
+        _showSnackBar('Post created successfully!');
         _titleController.clear();
         _textController.clear();
         setState(() {
@@ -183,13 +224,40 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error creating post: $e')));
+        _showSnackBar('Error creating post: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return; // Safety check
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showRejectionDialog(String reason) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Force user to click "Understand"
+      builder: (ctx) => AlertDialog(
+        title: const Text(
+          'Post Flagged (3R/Safety)',
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          'Your post violates community guidelines.\n\nReason: $reason',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Understand'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
