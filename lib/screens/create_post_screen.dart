@@ -166,7 +166,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       if (status == 'rejected') {
         if (mounted) {
           _showRejectionDialog(reason); // Help the user understand why
-
         }
         setState(() => _isLoading = false);
         return;
@@ -262,71 +261,202 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Scaffold(
+      backgroundColor: Colors.grey[100], // Soft background to make cards "pop"
       appBar: AppBar(title: const Text('Create Post')),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: primaryColor))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedTopic,
-                    items: _topics
-                        .map(
-                          (topic) => DropdownMenuItem(
-                            value: topic,
-                            child: Text(topic),
+                  // --- CARD 1: TOPIC SELECTION ---
+                  _buildInputCard(
+                    title: "Topic",
+                    icon: Icons.label_important_outline,
+                    child: _buildTopicChips(),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // --- CARD 2: TEXT CONTENT ---
+                  _buildInputCard(
+                    title: "Post Content",
+                    icon: Icons.edit_note_outlined,
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _titleController,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                        )
-                        .toList(),
-                    onChanged: (val) => setState(() => _selectedTopic = val!),
-                    decoration: const InputDecoration(
-                      labelText: 'Topic',
-                      border: OutlineInputBorder(),
+                          decoration: const InputDecoration(
+                            hintText: 'Post Title',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const Divider(height: 20),
+                        TextField(
+                          controller: _textController,
+                          maxLines: 6,
+                          decoration: const InputDecoration(
+                            hintText: "What do you want to share with SUC?",
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
                   const SizedBox(height: 16),
-                  TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      border: OutlineInputBorder(),
-                    ),
+
+                  // --- CARD 3: ATTACHMENTS ---
+                  _buildInputCard(
+                    title: "Media",
+                    icon: Icons.image_outlined,
+                    child: _buildImageSection(primaryColor),
                   ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _textController,
-                    maxLines: 5,
-                    decoration: const InputDecoration(
-                      labelText: 'Content',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_imageFile != null) ...[
-                    kIsWeb
-                        ? Image.network(_imageFile!.path, height: 150)
-                        : Image.file(_imageFile!, height: 150),
-                    const SizedBox(height: 8),
-                  ],
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.image),
-                    label: const Text('Attach Image'),
-                    onPressed: _pickImage,
-                  ),
-                  const SizedBox(height: 24),
+
+                  const SizedBox(height: 32),
+
+                  // --- SUBMIT BUTTON ---
                   ElevatedButton(
                     onPressed: _submitPost,
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
                     ),
-                    child: const Text('Post', style: TextStyle(fontSize: 16)),
+                    child: const Text(
+                      'Publish to Forum',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
+    );
+  }
+
+  // Helper Widget to wrap sections in a Card-like Container
+  Widget _buildInputCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: Colors.blueGrey),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
+
+  // Improved Topic Chips logic
+  Widget _buildTopicChips() {
+    return Wrap(
+      spacing: 8.0,
+      children: _topics.map((topic) {
+        final isSelected = _selectedTopic == topic;
+        return ChoiceChip(
+          label: Text(topic),
+          selected: isSelected,
+          onSelected: (selected) => setState(() => _selectedTopic = topic),
+          selectedColor: Theme.of(context).primaryColor.withOpacity(0.15),
+          labelStyle: TextStyle(
+            color: isSelected ? Theme.of(context).primaryColor : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Improved Image Display / Selector
+  Widget _buildImageSection(Color primaryColor) {
+    if (_imageFile != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            kIsWeb
+                ? Image.network(
+                    _imageFile!.path,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Image.file(
+                    _imageFile!,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+            Positioned(
+              right: 8,
+              top: 8,
+              child: GestureDetector(
+                onTap: () => setState(() => _imageFile = null),
+                child: const CircleAvatar(
+                  backgroundColor: Colors.black54,
+                  radius: 14,
+                  child: Icon(Icons.close, size: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return OutlinedButton.icon(
+      onPressed: _pickImage,
+      icon: const Icon(Icons.add_a_photo_outlined),
+      label: const Text("Add an image"),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 }
