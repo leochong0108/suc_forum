@@ -6,11 +6,23 @@ import '../models/post.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import '../screens/post_detail_screen.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
 
   const PostCard({super.key, required this.post});
+
+  // Helper method to trigger the native share sheet
+  void _handleShare() {
+    Share.share(
+      'Check out this post on SUC Forum!\n\n'
+      '${post.title}\n'
+      'By: ${post.authorName}\n\n'
+      '${post.text}',
+      subject: post.title,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +191,7 @@ class PostCard extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 20),
                   Icon(
                     Icons.comment_outlined,
                     size: 18,
@@ -192,6 +204,12 @@ class PostCard extends StatelessWidget {
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w500,
                     ),
+                  ),
+                  const Spacer(),
+                  // Share Button
+                  IconButton(
+                    icon: Icon(Icons.share_outlined, size: 20, color: Colors.grey[600]),
+                    onPressed: _handleShare,
                   ),
                 ],
               ),

@@ -5,6 +5,7 @@ import '../models/post.dart';
 import '../models/comment.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -108,6 +109,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  void _sharePost() {
+    Share.share(
+      'Check out this post on SUC Forum!\n\n'
+      '${widget.post.title}\n'
+      'By: ${widget.post.authorName}\n\n'
+      '${widget.post.text}',
+      subject: widget.post.title,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final firestoreService = context.read<FirestoreService>();
@@ -116,6 +127,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       appBar: AppBar(
         title: Text(widget.post.topic),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: _sharePost,
+            tooltip: 'Share Post',
+          ),
           IconButton(
             icon: const Icon(Icons.report_problem),
             onPressed: _reportPost,
