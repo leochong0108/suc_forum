@@ -112,7 +112,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
                       isThreeLine: true,
 
-                      // ✅ 修改部分：两个按钮
+                      // ✅ edit part: two button
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
