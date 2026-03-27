@@ -47,6 +47,12 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('SUC Forum - Home'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(context: context, delegate: PostSearchDelegate());
+            },
+          ),
           if (authService.isAdmin)
             IconButton(
               icon: const Icon(Icons.admin_panel_settings),
@@ -99,6 +105,63 @@ class _PostList extends StatelessWidget {
             final post = posts[index];
             return PostCard(post: post);
           },
+        );
+      },
+    );
+  }
+}
+
+class PostSearchDelegate extends SearchDelegate {
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () => query = '', // Clear search text
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () => close(context, null), // Close search
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchList(context);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildSearchList(context);
+  }
+
+  Widget _buildSearchList(BuildContext context) {
+    if (query.isEmpty) {
+      return const Center(child: Text('Enter keywords to search...'));
+    }
+
+    final firestoreService = context.read<FirestoreService>();
+
+    return StreamBuilder<List<Post>>(
+      stream: firestoreService.searchPosts(query),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final results = snapshot.data!;
+        if (results.isEmpty) {
+          return const Center(child: Text('No matching posts found.'));
+        }
+
+        return ListView.builder(
+          itemCount: results.length,
+          itemBuilder: (context, index) => PostCard(post: results[index]),
         );
       },
     );
