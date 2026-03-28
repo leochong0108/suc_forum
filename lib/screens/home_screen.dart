@@ -196,5 +196,5 @@ class PostSearchDelegate extends SearchDelegate {
         );
       },
     );
-  }
+  } 
 }

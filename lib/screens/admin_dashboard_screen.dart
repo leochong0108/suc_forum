@@ -19,7 +19,7 @@ class AdminDashboardScreen extends StatelessWidget {
           child: Text('You do not have permission to access this page.'),
         ),
       );
-    }
+    } 
 
     return Scaffold(
       appBar: AppBar(title: const Text('Admin Dashboard - Reports')),
