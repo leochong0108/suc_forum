@@ -201,4 +201,21 @@ class FirestoreService {
               snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList(),
         );
   }
+
+  Stream<List<Post>> searchPosts(String query) {
+    return _db
+        .collection('posts')
+        .where('status', isEqualTo: 'approved') // Only search safe posts
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => Post.fromFirestore(doc))
+              .where(
+                (post) =>
+                    post.title.toLowerCase().contains(query.toLowerCase()) ||
+                    post.text.toLowerCase().contains(query.toLowerCase()),
+              )
+              .toList();
+        });
+  }
 }

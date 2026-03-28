@@ -157,17 +157,23 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       final moderation = await _moderateContent(
         _titleController.text,
         _textController.text,
-      );
+        ).timeout(const Duration(seconds: 10),); // Prevent infinite hanging if network is weak
 
       final String status = moderation['status']!;
       final String reason = moderation['reason']!;
 
       // 2. Handle Rejection (3R / Indecency)
-      if (status == 'rejected') {
-        if (mounted) {
-          _showRejectionDialog(reason); // Help the user understand why
-        }
+      if (status != 'approved') {
         setState(() => _isLoading = false);
+
+        if (status == 'rejected') {
+          _showRejectionDialog(reason); // Help the user understand why
+        } else {
+          // This handles 'pending', 'failed', or any network errors
+          _showSnackBar(
+            'Security check failed. Please check your internet connection.',
+          );
+        }
         return;
       }
 
