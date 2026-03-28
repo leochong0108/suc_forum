@@ -83,101 +83,195 @@ class AdminDashboardScreen extends StatelessWidget {
                   }
 
                   return Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     margin: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
-                    child: ListTile(
-                      leading: SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: postImageBase64 != null &&
-                                postImageBase64.isNotEmpty
-                            ? (postImageBase64.startsWith('http')
-                                ? Image.network(
-                                    postImageBase64,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.memory(
-                                    base64Decode(postImageBase64),
-                                    fit: BoxFit.cover,
-                                  ))
-                            : const Icon(Icons.warning,
-                                color: Colors.orange),
-                      ),
-
-                      title: Text('Reason: $reason\nPost: $postTitle'),
-
-                      subtitle: Text(
-                        'Content: $postContent\nReporter: $reporterId',
-                      ),
-
-                      isThreeLine: true,
-
-                      // ✅ edit part: two button
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        horizontal: 12, vertical: 6),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 🔘 Reject Button
-                          IconButton(
-                            icon: const Icon(Icons.close,
-                                color: Colors.red),
-                            tooltip: 'Reject Report',
-                            onPressed: () {
-                              FirebaseFirestore.instance
-                                  .collection('reports')
-                                  .doc(doc.id)
-                                  .delete();
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 📌 Image
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: postImageBase64 != null &&
+                                          postImageBase64.isNotEmpty
+                                      ? (postImageBase64.startsWith('http')
+                                          ? Image.network(
+                                              postImageBase64,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : Image.memory(
+                                              base64Decode(
+                                                  postImageBase64),
+                                              fit: BoxFit.cover,
+                                            ))
+                                      : Container(
+                                          color: Colors.orange.shade100,
+                                          child: const Icon(
+                                            Icons.warning,
+                                            color: Colors.orange,
+                                          ),
+                                        ),
+                                ),
+                              ),
 
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Report rejected. No action taken on post.'),
-                                  ),
-                                );
-                              }
-                            },
+                              const SizedBox(width: 10),
+
+                              // 📌 Text Content
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      postTitle,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      postContent,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          const TextStyle(fontSize: 13),
+                                    ),
+                                    const SizedBox(height: 6),
+
+                                    // 📌 Reason Tag
+                                    Container(
+                                      padding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius:
+                                            BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'Reason: $reason',
+                                        style: TextStyle(
+                                          color:
+                                              Colors.red.shade700,
+                                          fontSize: 12,
+                                          fontWeight:
+                                              FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      'Reporter: $reporterId',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
 
-                          // 🔴 Delete Button
-                          IconButton(
-                            icon: const Icon(Icons.delete,
-                                color: Colors.red),
-                            tooltip: 'Delete Post & Report',
-                            onPressed: () {
-                              if (postData != null &&
-                                  postData['authorId'] != null) {
-                                final title =
-                                    postData['title'] ?? 'your post';
+                          const SizedBox(height: 10),
 
-                                context
-                                    .read<FirestoreService>()
-                                    .sendNotification(
-                                      userId: postData['authorId'],
-                                      message:
-                                          'Admin has removed your post "$title" due to a user report.',
+                          // 📌 Buttons
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              // 🔘 Reject Button
+                              TextButton.icon(
+                                onPressed: () {
+                                  FirebaseFirestore.instance
+                                      .collection('reports')
+                                      .doc(doc.id)
+                                      .delete();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Report rejected. No action taken on post.'),
+                                      ),
                                     );
-                              }
+                                  }
+                                },
+                                icon: const Icon(Icons.close,
+                                    size: 18),
+                                label: const Text('Reject'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.grey,
+                                ),
+                              ),
 
-                              FirebaseFirestore.instance
-                                  .collection('posts')
-                                  .doc(postId)
-                                  .delete();
+                              const SizedBox(width: 8),
 
-                              FirebaseFirestore.instance
-                                  .collection('reports')
-                                  .doc(doc.id)
-                                  .delete();
+                              // 🔴 Delete Button
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  if (postData != null &&
+                                      postData['authorId'] !=
+                                          null) {
+                                    final title =
+                                        postData['title'] ??
+                                            'your post';
 
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Post & Report deleted, User notified (Offline mode active).',
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
+                                    context
+                                        .read<FirestoreService>()
+                                        .sendNotification(
+                                          userId: postData[
+                                              'authorId'],
+                                          message:
+                                              'Admin has removed your post "$title" due to a user report.',
+                                        );
+                                  }
+
+                                  FirebaseFirestore.instance
+                                      .collection('posts')
+                                      .doc(postId)
+                                      .delete();
+
+                                  FirebaseFirestore.instance
+                                      .collection('reports')
+                                      .doc(doc.id)
+                                      .delete();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Post & Report deleted, User notified (Offline mode active).',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.delete,
+                                    size: 18),
+                                label: const Text('Delete'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

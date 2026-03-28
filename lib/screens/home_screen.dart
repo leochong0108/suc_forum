@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/post.dart';
 import '../services/firestore_service.dart';
-// import 'post_detail_screen.dart';
 import 'admin_dashboard_screen.dart';
 import '../services/auth_service.dart';
 import '../widgets/post_card.dart';
@@ -46,6 +45,9 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('SUC Forum - Home'),
+        elevation: 2,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -58,13 +60,21 @@ class _HomeScreenState extends State<HomeScreen>
               icon: const Icon(Icons.admin_panel_settings),
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AdminDashboardScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const AdminDashboardScreen(),
+                ),
               ),
             ),
         ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          ),
+          labelColor: Theme.of(context).colorScheme.primary,
+          unselectedLabelColor: Colors.grey.shade600,
           tabs: _topics.map((topic) => Tab(text: topic)).toList(),
         ),
       ),
@@ -100,10 +110,17 @@ class _PostList extends StatelessWidget {
         }
 
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           itemCount: posts.length,
           itemBuilder: (context, index) {
             final post = posts[index];
-            return PostCard(post: post);
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: PostCard(
+                post: post,
+                // 在PostCard里可以增加Card圆角、阴影，保证整洁
+              ),
+            );
           },
         );
       },
@@ -142,7 +159,12 @@ class PostSearchDelegate extends SearchDelegate {
 
   Widget _buildSearchList(BuildContext context) {
     if (query.isEmpty) {
-      return const Center(child: Text('Enter keywords to search...'));
+      return const Center(
+        child: Text(
+          'Enter keywords to search...',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
     }
 
     final firestoreService = context.read<FirestoreService>();
@@ -156,12 +178,21 @@ class PostSearchDelegate extends SearchDelegate {
 
         final results = snapshot.data!;
         if (results.isEmpty) {
-          return const Center(child: Text('No matching posts found.'));
+          return const Center(
+            child: Text(
+              'No matching posts found.',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
         }
 
         return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           itemCount: results.length,
-          itemBuilder: (context, index) => PostCard(post: results[index]),
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: PostCard(post: results[index]),
+          ),
         );
       },
     );
