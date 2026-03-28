@@ -1,1 +1,13 @@
 flutter/ephemeral
+
+# Flutter generated files (Linux)
+linux/flutter/generated*
+
+# Flutter generated files (macOS)
+macos/Flutter/Generated*
+
+linux/flutter/generated_plugin_registrant.cc
+
+linux/flutter/generated_plugins.cmake
+
+macos/Flutter/GeneratedPluginRegistrant.swift
