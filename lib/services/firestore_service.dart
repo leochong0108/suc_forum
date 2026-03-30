@@ -52,9 +52,30 @@ class FirestoreService {
   }
 
   Future<void> deletePost(String postId) async {
-    // Note: To be totally clean, one might also delete the subcollections
-    // (comments) but keeping it simple.
-    await _db.collection('posts').doc(postId).delete();
+    final batch = _db.batch();
+
+    // 1. Delete the post itself
+    final postRef = _db.collection('posts').doc(postId);
+    batch.delete(postRef);
+
+    // 2. Cleanup all comments (subcollection)
+    final comments = await postRef.collection('comments').get();
+    for (var doc in comments.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // 3. Cleanup all favorites (collection group)
+    // Note: requires a Collection Group Index on "favorites"
+    final favorites = await _db
+        .collectionGroup('favorites')
+        .where('postId', isEqualTo: postId)
+        .get();
+
+    for (var doc in favorites.docs) {
+      batch.delete(doc.reference);
+    }
+
+    await batch.commit();
   }
 
   Future<void> updateLike(String postId, {required bool increment}) async {
@@ -172,7 +193,10 @@ class FirestoreService {
         .doc(post.id);
 
     if (isFavorite) {
-      await ref.set(post.toMap()); // Save the whole post for offline viewing
+      // Save the whole post for offline viewing + add postId for better cleanup
+      final data = post.toMap();
+      data['postId'] = post.id;
+      await ref.set(data);
     } else {
       await ref.delete();
     }

@@ -19,7 +19,7 @@ class AdminDashboardScreen extends StatelessWidget {
           child: Text('You do not have permission to access this page.'),
         ),
       );
-    } 
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Admin Dashboard - Reports')),
@@ -66,8 +66,7 @@ class AdminDashboardScreen extends StatelessWidget {
                   String? postImageBase64;
                   Map<String, dynamic>? postData;
 
-                  if (postSnapshot.connectionState ==
-                          ConnectionState.done &&
+                  if (postSnapshot.connectionState == ConnectionState.done &&
                       postSnapshot.hasData) {
                     postData =
                         postSnapshot.data!.data() as Map<String, dynamic>?;
@@ -88,7 +87,9 @@ class AdminDashboardScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     margin: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Column(
@@ -103,18 +104,18 @@ class AdminDashboardScreen extends StatelessWidget {
                                 child: SizedBox(
                                   width: 60,
                                   height: 60,
-                                  child: postImageBase64 != null &&
+                                  child:
+                                      postImageBase64 != null &&
                                           postImageBase64.isNotEmpty
                                       ? (postImageBase64.startsWith('http')
-                                          ? Image.network(
-                                              postImageBase64,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Image.memory(
-                                              base64Decode(
-                                                  postImageBase64),
-                                              fit: BoxFit.cover,
-                                            ))
+                                            ? Image.network(
+                                                postImageBase64,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.memory(
+                                                base64Decode(postImageBase64),
+                                                fit: BoxFit.cover,
+                                              ))
                                       : Container(
                                           color: Colors.orange.shade100,
                                           child: const Icon(
@@ -130,8 +131,7 @@ class AdminDashboardScreen extends StatelessWidget {
                               // 📌 Text Content
                               Expanded(
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       postTitle,
@@ -145,30 +145,26 @@ class AdminDashboardScreen extends StatelessWidget {
                                       postContent,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style:
-                                          const TextStyle(fontSize: 13),
+                                      style: const TextStyle(fontSize: 13),
                                     ),
                                     const SizedBox(height: 6),
 
                                     // 📌 Reason Tag
                                     Container(
-                                      padding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.red.shade50,
-                                        borderRadius:
-                                            BorderRadius.circular(6),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
                                         'Reason: $reason',
                                         style: TextStyle(
-                                          color:
-                                              Colors.red.shade700,
+                                          color: Colors.red.shade700,
                                           fontSize: 12,
-                                          fontWeight:
-                                              FontWeight.w500,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ),
@@ -203,17 +199,16 @@ class AdminDashboardScreen extends StatelessWidget {
                                       .delete();
 
                                   if (context.mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                            'Report rejected. No action taken on post.'),
+                                          'Report rejected. No action taken on post.',
+                                        ),
                                       ),
                                     );
                                   }
                                 },
-                                icon: const Icon(Icons.close,
-                                    size: 18),
+                                icon: const Icon(Icons.close, size: 18),
                                 label: const Text('Reject'),
                                 style: TextButton.styleFrom(
                                   foregroundColor: Colors.grey,
@@ -224,47 +219,66 @@ class AdminDashboardScreen extends StatelessWidget {
 
                               // 🔴 Delete Button
                               ElevatedButton.icon(
-                                onPressed: () {
-                                  if (postData != null &&
-                                      postData['authorId'] !=
-                                          null) {
-                                    final title =
-                                        postData['title'] ??
-                                            'your post';
+                                onPressed: () async {
+                                  try {
+                                    final firestoreService =
+                                        context.read<FirestoreService>();
+                                    final adminId = authService.user?.uid;
 
-                                    context
-                                        .read<FirestoreService>()
-                                        .sendNotification(
-                                          userId: postData[
-                                              'authorId'],
-                                          message:
-                                              'Admin has removed your post "$title" due to a user report.',
-                                        );
-                                  }
+                                    // 1. Notify the author (if possible)
+                                    if (postData != null &&
+                                        postData['authorId'] != null) {
+                                      final title =
+                                          postData['title'] ?? 'your post';
 
-                                  FirebaseFirestore.instance
-                                      .collection('posts')
-                                      .doc(postId)
-                                      .delete();
+                                      await firestoreService.sendNotification(
+                                        userId: postData['authorId'],
+                                        message:
+                                            'Admin has removed your post "$title" due to a user report.',
+                                      );
+                                    }
 
-                                  FirebaseFirestore.instance
-                                      .collection('reports')
-                                      .doc(doc.id)
-                                      .delete();
+                                    // 2. Centralized cleanup: deletes post, comments, and all user favorites (via collection group)
+                                    await firestoreService.deletePost(postId);
 
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Post & Report deleted, User notified (Offline mode active).',
+                                    // 3. 🔘 Explicitly delete from current admin favorites (fallback)
+                                    if (adminId != null) {
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(adminId)
+                                          .collection('favorites')
+                                          .doc(postId)
+                                          .delete();
+                                    }
+
+                                    // 4. Delete the report document
+                                    await FirebaseFirestore.instance
+                                        .collection('reports')
+                                        .doc(doc.id)
+                                        .delete();
+
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Post & Report deleted successfully.',
+                                          ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content:
+                                              Text('Failed to remove post: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   }
                                 },
-                                icon: const Icon(Icons.delete,
-                                    size: 18),
+                                icon: const Icon(Icons.delete, size: 18),
                                 label: const Text('Delete'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
