@@ -68,33 +68,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  // Future<String> _moderateContent(String text) async {
-  //   // 3R Sensitivity & Indecent content check using Gemini
-  //   try {
-  //     // NOTE: This assumes standard generative_ai package initialized with API key,
-  //     // or FirebaseVertexAI wrapper. We simulate the call structure here.
-  //     // If FirebaseVertexAI is successfully configured:
-  //     /*
-  //     final model = FirebaseVertexAI.instance.generativeModel(model: 'gemini-2.5-flash');
-  //     final prompt = "Review this post for 3R sensitivities (Race, Religion, Royalty in Malaysia contexts) and indecent content. Reply merely with 'APPROVED' if it is safe, or 'REJECTED: <reason>' if not. Text: $text";
-  //     final response = await model.generateContent([Content.text(prompt)]);
-  //     final result = response.text ?? 'APPROVED';
-  //     if (result.contains('REJECTED')) return 'rejected';
-  //     return 'approved';
-  //     */
-
-  //     final lower = text.toLowerCase();
-  //     final badWords = ['badword', 'fuck', 'shit', 'babi', 'sial'];
-  //     for (var word in badWords) {
-  //       if (lower.contains(word)) return 'rejected';
-  //     }
-  //     return 'approved';
-  //   } catch (e) {
-  //     debugPrint("Moderation error: $e");
-  //     return 'pending'; // Fallback to manual review
-  //   }
-  // }
-
   Future<Map<String, String>> _moderateContent(String title, String text) async {
     try {
       // 1. Initialize the model using the Google AI backend
@@ -370,7 +343,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -409,7 +382,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           label: Text(topic),
           selected: isSelected,
           onSelected: (selected) => setState(() => _selectedTopic = topic),
-          selectedColor: Theme.of(context).primaryColor.withOpacity(0.15),
+          selectedColor: Theme.of(context).primaryColor.withValues(alpha: 0.15),
           labelStyle: TextStyle(
             color: isSelected ? Theme.of(context).primaryColor : Colors.black87,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
