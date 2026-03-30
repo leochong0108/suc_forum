@@ -6,6 +6,7 @@ import '../models/comment.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
+import '../utils/date_formatter.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -48,6 +49,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       authorName: user.isAnonymous
           ? "Anonymous User #${user.uid.substring(0, 5)}"
           : (user.displayName ?? "Unknown User"),
+      authorRole: authService.isAdmin ? 'admin' : 'user',
       createdAt: DateTime.now(),
     );
 
@@ -158,9 +160,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       Text(widget.post.authorName),
                       const Spacer(),
                       Text(
-                        widget.post.createdAt.toLocal().toString().split(
-                          '.',
-                        )[0],
+                        DateFormatter.formatFull(widget.post.createdAt),
                       ),
                     ],
                   ),
@@ -211,10 +211,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         itemCount: comments.length,
                         itemBuilder: (context, index) {
                           final c = comments[index];
+                          final bool isAdminComment = c.authorRole == 'admin';
+
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.person, size: 20),
+                            leading: CircleAvatar(
+                              backgroundColor: isAdminComment ? Colors.blue[50] : Colors.grey[100],
+                              child: Icon(
+                                isAdminComment ? Icons.admin_panel_settings : Icons.person,
+                                size: 20
+                              ),
+                              // child: Icon(Icons.person, size: 20),
                             ),
                             title: Text(
                               c.authorName,

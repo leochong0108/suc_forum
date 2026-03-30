@@ -5,6 +5,7 @@ class Comment {
   final String text;
   final String authorId;
   final String authorName;
+  final String authorRole;
   final DateTime createdAt;
 
   Comment({
@@ -12,6 +13,7 @@ class Comment {
     required this.text,
     required this.authorId,
     required this.authorName,
+    required this.authorRole,
     required this.createdAt,
   });
 
@@ -22,6 +24,7 @@ class Comment {
       text: data['text'] ?? '',
       authorId: data['authorId'] ?? '',
       authorName: data['authorName'] ?? 'Unknown User',
+      authorRole: data['authorRole'] ?? 'user',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -31,6 +34,7 @@ class Comment {
       'text': text,
       'authorId': authorId,
       'authorName': authorName,
+      'authorRole': authorRole,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
