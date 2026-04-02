@@ -21,7 +21,7 @@ class YouScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('You'),
+        title: const Text('You', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
           if (authService.isAuthenticated)
             IconButton(
@@ -60,4 +60,3 @@ class YouScreen extends StatelessWidget {
     );
   }
 }
-

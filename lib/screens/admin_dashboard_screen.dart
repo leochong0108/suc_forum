@@ -22,7 +22,12 @@ class AdminDashboardScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Dashboard - Reports')),
+      appBar: AppBar(
+        title: const Text(
+          'Admin Dashboard - Reports',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('reports')
@@ -221,8 +226,8 @@ class AdminDashboardScreen extends StatelessWidget {
                               ElevatedButton.icon(
                                 onPressed: () async {
                                   try {
-                                    final firestoreService =
-                                        context.read<FirestoreService>();
+                                    final firestoreService = context
+                                        .read<FirestoreService>();
                                     final adminId = authService.user?.uid;
 
                                     // 1. Notify the author (if possible)
@@ -258,7 +263,9 @@ class AdminDashboardScreen extends StatelessWidget {
                                         .delete();
 
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
                                           content: Text(
                                             'Post & Report deleted successfully.',
@@ -268,10 +275,13 @@ class AdminDashboardScreen extends StatelessWidget {
                                     }
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
-                                          content:
-                                              Text('Failed to remove post: $e'),
+                                          content: Text(
+                                            'Failed to remove post: $e',
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );

@@ -15,7 +15,12 @@ class InboxScreen extends StatelessWidget {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Inbox')),
+        appBar: AppBar(
+          title: const Text(
+            'Inbox',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
         body: const Center(child: Text('Please log in to see notifications.')),
       );
     }

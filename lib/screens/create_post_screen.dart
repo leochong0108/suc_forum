@@ -68,13 +68,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
-  Future<Map<String, String>> _moderateContent(String title, String text) async {
+  Future<Map<String, String>> _moderateContent(
+    String title,
+    String text,
+  ) async {
     try {
       // 1. Initialize the model using the Google AI backend
       final model = FirebaseAI.googleAI().generativeModel(
         model: 'gemini-2.5-flash',
         generationConfig: GenerationConfig(
-          temperature: 0.1, // Lower temperature = more consistent "robot" moderation
+          temperature:
+              0.1, // Lower temperature = more consistent "robot" moderation
           responseMimeType: 'application/json', // Force JSON output
         ),
       );
@@ -127,10 +131,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       // );
 
       // 1. Run Gemini Moderation
-      final moderation = await _moderateContent(
-        _titleController.text,
-        _textController.text,
-        ).timeout(const Duration(seconds: 10),); // Prevent infinite hanging if network is weak
+      final moderation =
+          await _moderateContent(
+            _titleController.text,
+            _textController.text,
+          ).timeout(
+            const Duration(seconds: 10),
+          ); // Prevent infinite hanging if network is weak
 
       final String status = moderation['status']!;
       final String reason = moderation['reason']!;
@@ -244,7 +251,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100], // Soft background to make cards "pop"
-      appBar: AppBar(title: const Text('Create Post')),
+      appBar: AppBar(
+        title: const Text(
+          'Create Post',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primaryColor))
           : SingleChildScrollView(
@@ -365,17 +377,17 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           child,
         ],
       ),
     );
   }
 
-  // Improved Topic Chips logic
   Widget _buildTopicChips() {
     return Wrap(
-      spacing: 8.0,
+      spacing: 12.0,
+      runSpacing: 12.0,
       children: _topics.map((topic) {
         final isSelected = _selectedTopic == topic;
         return ChoiceChip(

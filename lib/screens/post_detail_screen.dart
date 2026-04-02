@@ -123,6 +123,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = context.watch<AuthService>();
     final firestoreService = context.read<FirestoreService>();
 
     return Scaffold(
@@ -136,7 +137,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.report_problem),
-            onPressed: _reportPost,
+            onPressed: authService.isAuthenticated ? _reportPost : null,
+            tooltip: authService.isAuthenticated
+                ? 'Report Post'
+                : 'Log in to report',
           ),
         ],
       ),
@@ -159,9 +163,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       const SizedBox(width: 4),
                       Text(widget.post.authorName),
                       const Spacer(),
-                      Text(
-                        DateFormatter.formatFull(widget.post.createdAt),
-                      ),
+                      Text(DateFormatter.formatFull(widget.post.createdAt)),
                     ],
                   ),
                   const Divider(height: 32),
@@ -216,10 +218,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
                             leading: CircleAvatar(
-                              backgroundColor: isAdminComment ? Colors.blue[50] : Colors.grey[100],
+                              backgroundColor: isAdminComment
+                                  ? Colors.blue[50]
+                                  : Colors.grey[100],
                               child: Icon(
-                                isAdminComment ? Icons.admin_panel_settings : Icons.person,
-                                size: 20
+                                isAdminComment
+                                    ? Icons.admin_panel_settings
+                                    : Icons.person,
+                                size: 20,
                               ),
                               // child: Icon(Icons.person, size: 20),
                             ),

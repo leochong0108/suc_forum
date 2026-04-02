@@ -5,11 +5,7 @@ class AuthForm extends StatefulWidget {
   final AuthService authService;
   final Function(String) onError;
 
-  const AuthForm({
-    super.key,
-    required this.authService,
-    required this.onError,
-  });
+  const AuthForm({super.key, required this.authService, required this.onError});
 
   @override
   State<AuthForm> createState() => _AuthFormState();
@@ -39,6 +35,7 @@ class _AuthFormState extends State<AuthForm> {
           Text(
             _isLogin ? 'Welcome Back' : 'Create an Account',
             style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           if (!_isLogin)
@@ -89,6 +86,7 @@ class _AuthFormState extends State<AuthForm> {
             },
             child: Text(_isLogin ? 'Sign In' : 'Register'),
           ),
+          SizedBox(height: 20),
           TextButton(
             onPressed: () {
               setState(() {
