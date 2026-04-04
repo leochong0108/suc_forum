@@ -387,7 +387,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget _buildTopicChips() {
     return Wrap(
       spacing: 12.0,
-      runSpacing: 12.0,
+      runSpacing: 5.0,
       children: _topics.map((topic) {
         final isSelected = _selectedTopic == topic;
         return ChoiceChip(
