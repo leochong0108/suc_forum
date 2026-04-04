@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/post.dart';
-import '../../services/firestore_service.dart';
+import '../../services/post_service.dart';
 import '../shared/post_card.dart';
 
 class PostSearchDelegate extends SearchDelegate {
@@ -43,10 +43,10 @@ class PostSearchDelegate extends SearchDelegate {
       );
     }
 
-    final firestoreService = context.read<FirestoreService>();
+    final postService = context.read<PostService>();
 
     return StreamBuilder<List<Post>>(
-      stream: firestoreService.searchPosts(query),
+      stream: postService.searchPosts(query),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());

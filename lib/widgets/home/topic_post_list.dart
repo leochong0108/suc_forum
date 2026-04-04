@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/post.dart';
-import '../../services/firestore_service.dart';
+import '../../services/post_service.dart';
 import '../shared/post_card.dart';
 
 class TopicPostList extends StatelessWidget {
@@ -11,10 +11,10 @@ class TopicPostList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = context.read<FirestoreService>();
+    final postService = context.read<PostService>();
 
     return StreamBuilder<List<Post>>(
-      stream: firestoreService.getPostsByTopic(topic),
+      stream: postService.getPostsByTopic(topic),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

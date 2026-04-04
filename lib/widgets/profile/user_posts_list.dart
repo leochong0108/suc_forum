@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import '../../models/post.dart';
 import '../../services/auth_service.dart';
-import '../../services/firestore_service.dart';
+import '../../services/post_service.dart';
 
 class UserPostsList extends StatelessWidget {
   final String uid;
@@ -110,7 +110,7 @@ class UserPostsList extends StatelessWidget {
 
                       try {
                         if (context.mounted) {
-                          context.read<FirestoreService>().updatePost(
+                          context.read<PostService>().updatePost(
                             post.id,
                             newTitle,
                             newText,
@@ -153,7 +153,7 @@ class UserPostsList extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
                 try {
-                  context.read<FirestoreService>().deletePost(post.id);
+                  context.read<PostService>().deletePost(post.id);
                   _showError(context, "Post deleted successfully.");
                 } catch (e) {
                   _showError(context, "Failed to delete post: $e");
@@ -170,11 +170,11 @@ class UserPostsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = context.watch<FirestoreService>();
+    final postService = context.watch<PostService>();
     final authService = context.read<AuthService>();
 
     return StreamBuilder<List<Post>>(
-      stream: firestoreService.getPostsByAuthor(uid),
+      stream: postService.getPostsByAuthor(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

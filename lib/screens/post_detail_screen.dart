@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/post.dart';
 import '../models/comment.dart';
-import '../services/firestore_service.dart';
+import '../services/post_service.dart';
+import '../services/comment_service.dart';
 import '../services/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
 import '../widgets/post_detail/post_content.dart';
@@ -23,7 +24,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       false; // Simplification. Real app tracks likes subcollection per user.
 
   void _toggleLike() async {
-    final firestoreService = context.read<FirestoreService>();
+    final postService = context.read<PostService>();
     final authService = context.read<AuthService>();
     final user = authService.user;
 
@@ -36,7 +37,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     setState(() => _isLiked = !_isLiked);
     // Execute without awaiting so local cache processes instantly
-    firestoreService.updateLike(widget.post.id, increment: _isLiked);
+    postService.updateLike(widget.post.id, increment: _isLiked);
   }
 
   void _postComment(String text) async {
@@ -63,7 +64,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
 
     // Execute locally without blocking UI wait
-    context.read<FirestoreService>().addComment(widget.post.id, comment);
+    context.read<CommentService>().addComment(widget.post.id, comment);
   }
 
   void _reportPost() async {
@@ -99,7 +100,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final reporterId = user?.uid ?? 'anonymous_reporter';
 
       try {
-        context.read<FirestoreService>().reportPost(
+        context.read<PostService>().reportPost(
           widget.post.id,
           reporterId,
           result,

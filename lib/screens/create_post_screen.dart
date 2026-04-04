@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/post.dart';
 import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
+import '../services/post_service.dart';
 import '../services/moderation_service.dart';
 import '../services/image_service.dart';
 import '../widgets/create_post/input_card.dart';
@@ -47,7 +47,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   Future<void> _submitPost() async {
     final authService = context.read<AuthService>();
-    final firestoreService = context.read<FirestoreService>();
+    final postService = context.read<PostService>();
     final moderationService = context.read<ModerationService>();
     final user = authService.user;
 
@@ -114,7 +114,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
       // We use a timeout because Firestore offline persistence will immediately
       // save the post locally but the network sync might hang if there's no internet.
-      await firestoreService
+      await postService
           .createPost(post)
           .timeout(
             const Duration(seconds: 1),

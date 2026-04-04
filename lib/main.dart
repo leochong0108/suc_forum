@@ -6,7 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'screens/main_layout.dart';
 import 'services/auth_service.dart';
-import 'services/firestore_service.dart';
+import 'services/post_service.dart';
+import 'services/comment_service.dart';
+import 'services/notification_service.dart';
+import 'services/user_service.dart';
 import 'services/moderation_service.dart';
 import 'services/image_service.dart';
 import 'services/admin_service.dart';
@@ -36,7 +39,10 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        Provider(create: (_) => FirestoreService()),
+        Provider(create: (_) => PostService()),
+        Provider(create: (_) => CommentService()),
+        Provider(create: (_) => NotificationService()),
+        Provider(create: (_) => UserService()),
         Provider(create: (_) => ModerationService()),
         Provider(create: (_) => ImageService()),
         Provider(create: (_) => AdminService()),

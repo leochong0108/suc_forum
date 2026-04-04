@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'firestore_service.dart';
+import 'post_service.dart';
+import 'notification_service.dart';
 
 class AdminService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -16,7 +17,8 @@ class AdminService {
   }
 
   Future<void> deletePostAndReport({
-    required FirestoreService firestoreService,
+    required PostService postService,
+    required NotificationService notificationService,
     required String reportId,
     required String postId,
     required Map<String, dynamic>? postData,
@@ -25,14 +27,14 @@ class AdminService {
     // 1. Notify the author (if possible)
     if (postData != null && postData['authorId'] != null) {
       final title = postData['title'] ?? 'your post';
-      await firestoreService.sendNotification(
+      await notificationService.sendNotification(
         userId: postData['authorId'],
         message: 'Admin has removed your post "$title" due to a user report.',
       );
     }
 
     // 2. Centralized cleanup: deletes post, comments, and all user favorites (via collection group)
-    await firestoreService.deletePost(postId);
+    await postService.deletePost(postId);
 
     // 3. Explicitly delete from current admin favorites (fallback)
     if (adminId != null) {

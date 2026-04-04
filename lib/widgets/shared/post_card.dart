@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../../models/post.dart';
-import '../../services/firestore_service.dart';
+import '../../services/user_service.dart';
 import '../../services/auth_service.dart';
 import '../../screens/post_detail_screen.dart';
 import 'package:share_plus/share_plus.dart';
@@ -27,7 +27,7 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
-    final firestoreService = context.read<FirestoreService>();
+    final userService = context.read<UserService>();
     final userId = authService.user?.uid;
 
     return Card(
@@ -90,7 +90,7 @@ class PostCard extends StatelessWidget {
                   ),
                   if (userId != null)
                     StreamBuilder<bool>(
-                      stream: firestoreService.isPostFavorited(userId, post.id),
+                      stream: userService.isPostFavorited(userId, post.id),
                       builder: (context, snapshot) {
                         final isBookmarked = snapshot.data ?? false;
                         return IconButton(
@@ -106,7 +106,7 @@ class PostCard extends StatelessWidget {
                                 : Colors.grey[400],
                           ),
                           onPressed: () {
-                            firestoreService.toggleFavorite(
+                            userService.toggleFavorite(
                               userId,
                               post,
                               !isBookmarked,

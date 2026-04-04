@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/post.dart';
-import '../services/firestore_service.dart';
+import '../services/user_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/shared/post_card.dart'; // Import the same shared UI
 
@@ -11,7 +11,7 @@ class CollectionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = context.read<AuthService>();
-    final firestoreService = context.read<FirestoreService>();
+    final userService = context.read<UserService>();
     final userId = authService.user?.uid;
 
     return Scaffold(
@@ -19,7 +19,7 @@ class CollectionsScreen extends StatelessWidget {
       body: userId == null
           ? const Center(child: Text('Please log in to see collections'))
           : StreamBuilder<List<Post>>(
-              stream: firestoreService.getFavoritePosts(userId),
+              stream: userService.getFavoritePosts(userId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

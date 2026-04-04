@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/admin_service.dart';
 import '../../services/auth_service.dart';
-import '../../services/firestore_service.dart';
+import '../../services/post_service.dart';
+import '../../services/notification_service.dart';
 
 class AdminReportCard extends StatelessWidget {
   final DocumentSnapshot reportDoc;
@@ -19,10 +20,11 @@ class AdminReportCard extends StatelessWidget {
     final reporterId = data['reporterId'] ?? 'Unknown';
     final adminService = context.read<AdminService>();
     final authService = context.read<AuthService>();
-    final firestoreService = context.read<FirestoreService>();
+    final postService = context.read<PostService>();
+    final notificationService = context.read<NotificationService>();
 
     return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('posts').doc(postId).get(),
+      future: postService.getPostById(postId),
       builder: (context, postSnapshot) {
         String postTitle = 'Loading...';
         String postContent = '...';
@@ -179,7 +181,8 @@ class AdminReportCard extends StatelessWidget {
                       onPressed: () async {
                         try {
                           await adminService.deletePostAndReport(
-                            firestoreService: firestoreService,
+                            postService: postService,
+                            notificationService: notificationService,
                             reportId: reportDoc.id,
                             postId: postId,
                             postData: postData,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/comment.dart';
-import '../../services/firestore_service.dart';
+import '../../services/comment_service.dart';
 
 class CommentList extends StatelessWidget {
   final String postId;
@@ -10,10 +10,10 @@ class CommentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final firestoreService = context.read<FirestoreService>();
+    final commentService = context.read<CommentService>();
 
     return StreamBuilder<List<Comment>>(
-      stream: firestoreService.getComments(postId),
+      stream: commentService.getComments(postId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());

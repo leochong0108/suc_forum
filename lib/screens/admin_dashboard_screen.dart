@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/admin_service.dart';
 import '../widgets/admin/admin_report_card.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
@@ -28,10 +29,7 @@ class AdminDashboardScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('reports')
-            .orderBy('createdAt', descending: true)
-            .snapshots(),
+        stream: context.read<AdminService>().getReportsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

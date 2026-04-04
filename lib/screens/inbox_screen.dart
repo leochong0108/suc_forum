@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
+import '../services/notification_service.dart';
 
 class InboxScreen extends StatelessWidget {
   const InboxScreen({super.key});
@@ -28,7 +28,8 @@ class InboxScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Inbox')),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: context.read<FirestoreService>().getUserNotifications(user.uid),
+        stream:
+            context.read<NotificationService>().getUserNotifications(user.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
