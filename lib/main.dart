@@ -7,6 +7,9 @@ import 'firebase_options.dart';
 import 'screens/main_layout.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
+import 'services/moderation_service.dart';
+import 'services/image_service.dart';
+import 'services/admin_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +37,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
         Provider(create: (_) => FirestoreService()),
+        Provider(create: (_) => ModerationService()),
+        Provider(create: (_) => ImageService()),
+        Provider(create: (_) => AdminService()),
       ],
       child: const MyApp(),
     ),

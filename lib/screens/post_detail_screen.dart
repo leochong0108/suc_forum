@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/post.dart';
@@ -6,7 +5,9 @@ import '../models/comment.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import 'package:share_plus/share_plus.dart';
-import '../utils/date_formatter.dart';
+import '../widgets/post_detail/post_content.dart';
+import '../widgets/post_detail/comment_list.dart';
+import '../widgets/post_detail/comment_input.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -18,19 +19,27 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
-  final _commentController = TextEditingController();
   bool _isLiked =
       false; // Simplification. Real app tracks likes subcollection per user.
 
   void _toggleLike() async {
     final firestoreService = context.read<FirestoreService>();
+    final authService = context.read<AuthService>();
+    final user = authService.user;
+
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please log in to like.')));
+      return;
+    }
+
     setState(() => _isLiked = !_isLiked);
     // Execute without awaiting so local cache processes instantly
     firestoreService.updateLike(widget.post.id, increment: _isLiked);
   }
 
-  void _postComment() async {
-    final text = _commentController.text.trim();
+  void _postComment(String text) async {
     if (text.isEmpty) return;
 
     final authService = context.read<AuthService>();
@@ -55,7 +64,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     // Execute locally without blocking UI wait
     context.read<FirestoreService>().addComment(widget.post.id, comment);
-    _commentController.clear();
   }
 
   void _reportPost() async {
@@ -124,7 +132,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = context.watch<AuthService>();
-    final firestoreService = context.read<FirestoreService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -152,44 +159,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.post.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      const Icon(Icons.person, size: 16),
-                      const SizedBox(width: 4),
-                      Text(widget.post.authorName),
-                      const Spacer(),
-                      Text(DateFormatter.formatFull(widget.post.createdAt)),
-                    ],
-                  ),
-                  const Divider(height: 32),
-                  if (widget.post.imageUrl != null) ...[
-                    widget.post.imageUrl!.startsWith('http')
-                        ? Image.network(widget.post.imageUrl!)
-                        : Image.memory(base64Decode(widget.post.imageUrl!)),
-                    const SizedBox(height: 16),
-                  ],
-                  Text(widget.post.text, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          _isLiked
-                              ? Icons.thumb_up
-                              : Icons.thumb_up_alt_outlined,
-                        ),
-                        color: _isLiked ? Colors.blue : null,
-                        onPressed: _toggleLike,
-                      ),
-                      Text(
-                        '${widget.post.likesCount + (_isLiked ? 1 : 0)} Likes',
-                      ),
-                    ],
+                  PostContent(
+                    post: widget.post,
+                    isLiked: _isLiked,
+                    onToggleLike: _toggleLike,
                   ),
                   const Divider(height: 32),
                   const Text(
@@ -197,75 +170,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  StreamBuilder<List<Comment>>(
-                    stream: firestoreService.getComments(widget.post.id),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const CircularProgressIndicator();
-                      }
-                      final comments = snapshot.data!;
-                      if (comments.isEmpty) {
-                        return const Text('No comments yet.');
-                      }
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          final c = comments[index];
-                          final bool isAdminComment = c.authorRole == 'admin';
-
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: CircleAvatar(
-                              backgroundColor: isAdminComment
-                                  ? Colors.blue[50]
-                                  : Colors.grey[100],
-                              child: Icon(
-                                isAdminComment
-                                    ? Icons.admin_panel_settings
-                                    : Icons.person,
-                                size: 20,
-                              ),
-                              // child: Icon(Icons.person, size: 20),
-                            ),
-                            title: Text(
-                              c.authorName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            subtitle: Text(c.text),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  CommentList(postId: widget.post.id),
                 ],
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: 'Add a comment...',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _postComment,
-                ),
-              ],
-            ),
-          ),
+          CommentInput(onSend: _postComment),
         ],
       ),
     );

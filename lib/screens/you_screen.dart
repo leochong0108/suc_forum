@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import '../widgets/auth_form.dart';
-import '../widgets/profile_header.dart';
-import '../widgets/user_posts_list.dart';
+import '../widgets/auth/auth_form.dart';
+import '../widgets/profile/profile_header.dart';
+import '../widgets/profile/user_posts_list.dart';
+import '../widgets/shared/post_card.dart';
 import 'favorite_screen.dart';
 
 class YouScreen extends StatelessWidget {

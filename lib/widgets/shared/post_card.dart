@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../models/post.dart';
-import '../services/firestore_service.dart';
-import '../services/auth_service.dart';
-import '../screens/post_detail_screen.dart';
+import '../../models/post.dart';
+import '../../services/firestore_service.dart';
+import '../../services/auth_service.dart';
+import '../../screens/post_detail_screen.dart';
 import 'package:share_plus/share_plus.dart';
 
 class PostCard extends StatelessWidget {

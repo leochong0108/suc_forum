@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-import '../models/post.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
+import '../../models/post.dart';
+import '../../services/auth_service.dart';
+import '../../services/firestore_service.dart';
 
 class UserPostsList extends StatelessWidget {
   final String uid;

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/post.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
-import '../widgets/post_card.dart'; // Import the same shared UI
+import '../widgets/shared/post_card.dart'; // Import the same shared UI
 
 class CollectionsScreen extends StatelessWidget {
   const CollectionsScreen({super.key});

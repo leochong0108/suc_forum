@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
+import '../../services/auth_service.dart';
+import '../../services/firestore_service.dart';
 
 class ProfileHeader extends StatelessWidget {
   final AuthService authService;

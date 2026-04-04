@@ -13,6 +13,15 @@ class AuthService extends ChangeNotifier {
   String? get userRole => _userRole;
   bool get isAdmin => _userRole == 'admin';
 
+  String get authorName {
+    final u = _user;
+    if (u == null) return "Guest";
+    if (u.isAnonymous) {
+      return "Anonymous User #${u.uid.substring(0, 5)}";
+    }
+    return u.displayName ?? "Unknown User";
+  }
+
   AuthService() {
     _auth.authStateChanges().listen((User? user) async {
       _user = user;
